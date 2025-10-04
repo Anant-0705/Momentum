@@ -2,14 +2,23 @@
 
 import { motion } from 'framer-motion'
 import { ContestCard } from '@/components/ContestCard'
-import { mockContests, getLiveContests, getEndedContests } from '@/lib/mockData'
-import { TrendingUp, Trophy, ArrowLeft } from 'lucide-react'
+import { TrendingUp, Trophy, ArrowLeft, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { useActiveContests, useResolvedContests } from '@/lib/hooks/useContracts'
 
 export default function ContestsPage() {
-  const liveContests = getLiveContests()
-  const endedContests = getEndedContests()
+  const { 
+    activeContests, 
+    isLoading: loadingActive, 
+    error: activeError 
+  } = useActiveContests()
+  
+  const { 
+    resolvedContests, 
+    isLoading: loadingResolved, 
+    error: resolvedError 
+  } = useResolvedContests()
 
   return (
     <div className="min-h-screen pt-24 pb-16">
@@ -62,20 +71,30 @@ export default function ContestsPage() {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {liveContests.map((contest, index) => (
-              <motion.div
-                key={contest.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.1 + index * 0.1 }}
-              >
-                <ContestCard contest={contest} index={index} />
-              </motion.div>
-            ))}
-          </div>
-
-          {liveContests.length === 0 && (
+          {loadingActive ? (
+            <div className="flex justify-center items-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-violet-400" />
+              <span className="ml-3 text-white/70">Loading live contests...</span>
+            </div>
+          ) : activeError ? (
+            <div className="text-center py-12">
+              <div className="text-red-400 text-lg mb-4">Failed to load live contests</div>
+              <p className="text-white/60 text-sm">{activeError.message}</p>
+            </div>
+          ) : activeContests && activeContests.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {activeContests.map((contestAddress, index) => (
+                <motion.div
+                  key={contestAddress}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.1 + index * 0.1 }}
+                >
+                  <ContestCard contestAddress={contestAddress} index={index} />
+                </motion.div>
+              ))}
+            </div>
+          ) : (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -84,6 +103,11 @@ export default function ContestsPage() {
               <div className="text-white/60 text-lg">
                 No live contests at the moment. Check back soon!
               </div>
+              <Button asChild className="mt-6 bg-gradient-to-r from-violet-600 to-purple-600">
+                <Link href="/admin">
+                  Create First Contest
+                </Link>
+              </Button>
             </motion.div>
           )}
         </section>
@@ -107,20 +131,30 @@ export default function ContestsPage() {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {endedContests.map((contest, index) => (
-              <motion.div
-                key={contest.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.2 + index * 0.1 }}
-              >
-                <ContestCard contest={contest} index={index} />
-              </motion.div>
-            ))}
-          </div>
-
-          {endedContests.length === 0 && (
+          {loadingResolved ? (
+            <div className="flex justify-center items-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-violet-400" />
+              <span className="ml-3 text-white/70">Loading contest history...</span>
+            </div>
+          ) : resolvedError ? (
+            <div className="text-center py-12">
+              <div className="text-red-400 text-lg mb-4">Failed to load contest history</div>
+              <p className="text-white/60 text-sm">{resolvedError.message}</p>
+            </div>
+          ) : resolvedContests && resolvedContests.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {resolvedContests.map((contestAddress, index) => (
+                <motion.div
+                  key={contestAddress}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.2 + index * 0.1 }}
+                >
+                  <ContestCard contestAddress={contestAddress} index={index} />
+                </motion.div>
+              ))}
+            </div>
+          ) : (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}

@@ -4,20 +4,72 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { CountdownTimer } from '@/components/CountdownTimer'
-import { Contest } from '@/lib/mockData'
-import { formatUSDC } from '@/lib/utils'
-import { TrendingUp, Users, Eye } from 'lucide-react'
+import { formatUSDC, formatTimeRemaining } from '@/lib/contracts'
+import { useContestInfo } from '@/lib/hooks/useContracts'
+import { TrendingUp, Users, Eye, Loader2, AlertCircle } from 'lucide-react'
 
 interface ContestCardProps {
-  contest: Contest
+  contestAddress: string
   index?: number
 }
 
-export function ContestCard({ contest, index = 0 }: ContestCardProps) {
-  const totalStaked = (contest.totalStakedOnA || 0) + (contest.totalStakedOnB || 0)
-  const isLive = contest.status === 'live'
-  const isRevealed = contest.status === 'revealed'
+export function ContestCard({ contestAddress, index = 0 }: ContestCardProps) {
+  const {
+    contestInfo,
+    question,
+    optionA,
+    optionB,
+    totalStakedOnA,
+    totalStakedOnB,
+    winnerIsA,
+    isLoading,
+    error
+  } = useContestInfo(contestAddress)
+
+  if (isLoading) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: index * 0.1 }}
+        className="h-64"
+      >
+        <Card className="h-full flex items-center justify-center">
+          <div className="flex items-center space-x-3">
+            <Loader2 className="h-6 w-6 animate-spin text-violet-500" />
+            <span className="text-gray-600 dark:text-gray-400">Loading contest...</span>
+          </div>
+        </Card>
+      </motion.div>
+    )
+  }
+
+  if (error || !contestInfo || !question) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: index * 0.1 }}
+        className="h-64"
+      >
+        <Card className="h-full flex items-center justify-center border-red-200 dark:border-red-800">
+          <div className="text-center p-6">
+            <AlertCircle className="h-8 w-8 text-red-500 mx-auto mb-3" />
+            <p className="text-red-600 dark:text-red-400 text-sm">
+              Failed to load contest
+            </p>
+            <p className="text-gray-500 text-xs mt-1">
+              {error?.message || 'Unknown error'}
+            </p>
+          </div>
+        </Card>
+      </motion.div>
+    )
+  }
+
+  const totalStaked = (totalStakedOnA || BigInt(0)) + (totalStakedOnB || BigInt(0))
+  const isLive = contestInfo.isActive
+  const isRevealed = contestInfo.isResolved
 
   return (
     <motion.div
@@ -38,69 +90,82 @@ export function ContestCard({ contest, index = 0 }: ContestCardProps) {
             }`}>
               {isLive ? '🔴 Live' : isRevealed ? '✅ Revealed' : '⏸ Ended'}
             </div>
-            {isLive && (
-              <CountdownTimer 
-                endTime={contest.endTime} 
-                className="text-xs"
-              />
+            {isLive && contestInfo.timeRemaining > BigInt(0) && (
+              <div className="text-xs bg-orange-100 dark:bg-orange-900/20 text-orange-800 dark:text-orange-200 px-2 py-1 rounded">
+                {formatTimeRemaining(contestInfo.timeRemaining)}
+              </div>
             )}
           </div>
-          <CardTitle className="text-lg leading-tight text-gray-900 dark:text-gray-100">
-            {contest.question}
+          <CardTitle className="text-lg leading-tight text-gray-900 dark:text-gray-100 min-h-[3rem]">
+            {question}
           </CardTitle>
         </CardHeader>
-        
+
         <CardContent className="space-y-4">
-          {/* Options Preview */}
-          <div className="space-y-2">
+          {/* Options Display */}
+          <div className="space-y-3">
             <div className={`p-3 rounded-lg border-2 transition-colors ${
-              isRevealed && contest.winnerIsA 
-                ? 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-700' 
-                : 'bg-gray-50 border-gray-200 dark:bg-gray-800 dark:border-gray-700'
+              isRevealed && winnerIsA 
+                ? 'border-green-300 bg-green-50 dark:border-green-700 dark:bg-green-900/20'
+                : 'border-blue-200 dark:border-blue-800'
             }`}>
               <div className="flex justify-between items-center">
-                <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                  A: {contest.optionA}
+                <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
+                  Option A: {optionA}
                 </span>
-                {isRevealed && contest.winnerIsA && (
-                  <TrendingUp className="h-4 w-4 text-green-600" />
+                {isRevealed && winnerIsA && (
+                  <span className="text-green-600 text-xs">✅ Winner</span>
                 )}
               </div>
+              {!isLive && totalStakedOnA !== undefined && (
+                <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                  ${formatUSDC(totalStakedOnA)} staked
+                </div>
+              )}
             </div>
+            
             <div className={`p-3 rounded-lg border-2 transition-colors ${
-              isRevealed && !contest.winnerIsA 
-                ? 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-700' 
-                : 'bg-gray-50 border-gray-200 dark:bg-gray-800 dark:border-gray-700'
+              isRevealed && !winnerIsA 
+                ? 'border-green-300 bg-green-50 dark:border-green-700 dark:bg-green-900/20'
+                : 'border-purple-200 dark:border-purple-800'
             }`}>
               <div className="flex justify-between items-center">
-                <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                  B: {contest.optionB}
+                <span className="text-sm font-medium text-purple-700 dark:text-purple-300">
+                  Option B: {optionB}
                 </span>
-                {isRevealed && !contest.winnerIsA && (
-                  <TrendingUp className="h-4 w-4 text-green-600" />
+                {isRevealed && !winnerIsA && (
+                  <span className="text-green-600 text-xs">✅ Winner</span>
                 )}
               </div>
+              {!isLive && totalStakedOnB !== undefined && (
+                <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                  ${formatUSDC(totalStakedOnB)} staked
+                </div>
+              )}
             </div>
           </div>
 
           {/* Stats */}
-          <div className="flex justify-between items-center pt-2 border-t border-gray-200 dark:border-gray-700">
-            <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
-              <div className="flex items-center space-x-1">
-                <Users className="h-4 w-4" />
-                <span>
-                  {isLive ? '?' : formatUSDC(totalStaked)}
-                </span>
-              </div>
+          <div className="flex justify-between items-center text-sm text-gray-600 dark:text-gray-400">
+            <div className="flex items-center space-x-1">
+              <TrendingUp className="h-4 w-4" />
+              <span>
+                {isLive ? 'Stakes Hidden' : `$${formatUSDC(totalStaked)}`}
+              </span>
             </div>
-            
-            <Link href={`/contest/${contest.address}`}>
-              <Button variant="gradient" size="sm" className="shadow-md">
-                <Eye className="h-4 w-4 mr-2" />
-                View Contest
-              </Button>
-            </Link>
+            <div className="flex items-center space-x-1">
+              <Users className="h-4 w-4" />
+              <span>{isLive ? '?' : 'Multiple'}</span>
+            </div>
           </div>
+
+          {/* Action Button */}
+          <Button asChild className="w-full" variant="outline">
+            <Link href={`/contest/${contestAddress}`}>
+              <Eye className="h-4 w-4 mr-2" />
+              {isLive ? 'Stake Now' : isRevealed ? 'View Results' : 'View Contest'}
+            </Link>
+          </Button>
         </CardContent>
       </Card>
     </motion.div>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -13,19 +13,55 @@ import {
   Settings,
   Shield,
   Users,
-  TrendingUp
+  TrendingUp,
+  AlertCircle,
+  ExternalLink,
+  Wallet
 } from 'lucide-react'
+import { useAccount, useConnect } from 'wagmi'
+import { 
+  useCreateContest, 
+  useFactoryStats, 
+  useIsAdmin,
+  useUSDCBalance 
+} from '@/lib/hooks/useContracts'
+import { formatUSDC } from '@/lib/contracts'
+import { ADMIN_ADDRESS } from '@/lib/wagmi'
+import { USDCFaucet } from '@/components/USDCFaucet'
 
 export default function AdminPage() {
-  const [isCreating, setIsCreating] = useState(false)
-  const [isCreated, setIsCreated] = useState(false)
+  const { address, isConnected } = useAccount()
+  const { connect, connectors } = useConnect()
+  const isAdmin = useIsAdmin()
+  const { stats, isLoading: statsLoading, refetch: refetchStats } = useFactoryStats()
+  const { balance: adminBalance, balanceFormatted } = useUSDCBalance(address)
+  
   const [formData, setFormData] = useState({
     question: '',
     optionA: '',
-    optionB: '',
-    endDate: '',
-    endTime: ''
+    optionB: ''
   })
+
+  const {
+    createContest,
+    isLoading: isCreating,
+    isSuccess,
+    error: createError,
+    hash: txHash
+  } = useCreateContest()
+
+  // Reset form on success
+  useEffect(() => {
+    if (isSuccess) {
+      setFormData({
+        question: '',
+        optionA: '',
+        optionB: ''
+      })
+      // Refetch stats after successful creation
+      refetchStats()
+    }
+  }, [isSuccess, refetchStats])
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
@@ -35,28 +71,70 @@ export default function AdminPage() {
   }
 
   const handleCreateContest = async () => {
-    setIsCreating(true)
-    
-    // Simulate contract interaction
-    await new Promise(resolve => setTimeout(resolve, 3000))
-    
-    setIsCreating(false)
-    setIsCreated(true)
-    
-    // Reset form after 3 seconds
-    setTimeout(() => {
-      setIsCreated(false)
-      setFormData({
-        question: '',
-        optionA: '',
-        optionB: '',
-        endDate: '',
-        endTime: ''
-      })
-    }, 3000)
+    if (!isAdmin) {
+      alert('Only admin can create contests')
+      return
+    }
+
+    try {
+      await createContest(formData.question, formData.optionA, formData.optionB)
+    } catch (error) {
+      console.error('Failed to create contest:', error)
+    }
   }
 
-  const isFormValid = formData.question && formData.optionA && formData.optionB && formData.endDate && formData.endTime
+  const isFormValid = formData.question.trim() && formData.optionA.trim() && formData.optionB.trim()
+
+  // Show wallet connection requirement
+  if (!isConnected) {
+    return (
+      <div className="min-h-screen pt-24 pb-16 flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto px-4">
+          <div className="p-4 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 w-20 h-20 mx-auto mb-6 flex items-center justify-center">
+            <Wallet className="h-10 w-10 text-violet-400" />
+          </div>
+          <h1 className="text-2xl font-bold text-white mb-4">
+            Connect Your Wallet
+          </h1>
+          <p className="text-white/80 mb-6">
+            Connect your wallet to access the admin panel and create contests.
+          </p>
+          <Button 
+            onClick={() => connect({ connector: connectors[0] })}
+            className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700"
+          >
+            <Wallet className="h-4 w-4 mr-2" />
+            Connect Wallet
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
+  // Show admin access restriction
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen pt-24 pb-16 flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto px-4">
+          <div className="p-4 rounded-full bg-red-500/10 border border-red-500/20 w-20 h-20 mx-auto mb-6 flex items-center justify-center">
+            <AlertCircle className="h-10 w-10 text-red-400" />
+          </div>
+          <h1 className="text-2xl font-bold text-white mb-4">
+            Access Restricted
+          </h1>
+          <p className="text-white/80 mb-4">
+            Only the admin can access this panel and create contests.
+          </p>
+          <div className="bg-white/5 rounded-lg p-4 text-left">
+            <p className="text-sm text-white/60 mb-2">Admin Address:</p>
+            <p className="text-xs font-mono text-white/80 break-all">{ADMIN_ADDRESS}</p>
+            <p className="text-sm text-white/60 mt-3 mb-2">Your Address:</p>
+            <p className="text-xs font-mono text-white/80 break-all">{address}</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen pt-24 pb-16">
@@ -84,6 +162,9 @@ export default function AdminPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Create Contest Form */}
           <div className="lg:col-span-2">
+            {/* USDC Faucet */}
+            <USDCFaucet />
+            
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -98,7 +179,7 @@ export default function AdminPage() {
                 </CardHeader>
                 
                 <CardContent className="space-y-6">
-                  {isCreated ? (
+                  {isSuccess ? (
                     <motion.div
                       initial={{ opacity: 0, scale: 0.8 }}
                       animate={{ opacity: 1, scale: 1 }}
@@ -109,16 +190,49 @@ export default function AdminPage() {
                         Contest Created Successfully!
                       </h3>
                       <p className="text-gray-600 dark:text-gray-400 mb-6">
-                        Your contest has been deployed to the blockchain and is now live.
+                        Your contest has been deployed to the blockchain and is now live for 24 hours.
                       </p>
-                      <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-                        <p className="text-sm font-mono text-gray-600 dark:text-gray-400">
-                          Contract Address: 0x1234...5678
-                        </p>
-                      </div>
+                      {txHash && (
+                        <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 mb-4">
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Transaction Hash:</p>
+                          <div className="flex items-center justify-center space-x-2">
+                            <p className="text-xs font-mono text-gray-600 dark:text-gray-400 break-all">
+                              {txHash}
+                            </p>
+                            <a 
+                              href={`https://sepolia.etherscan.io/tx/${txHash}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-violet-600 hover:text-violet-700"
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                            </a>
+                          </div>
+                        </div>
+                      )}
+                      <Button
+                        onClick={() => window.location.reload()}
+                        variant="outline"
+                        className="mt-4"
+                      >
+                        Create Another Contest
+                      </Button>
                     </motion.div>
                   ) : (
                     <>
+                      {/* Error Display */}
+                      {createError && (
+                        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-6">
+                          <div className="flex items-center">
+                            <AlertCircle className="h-5 w-5 text-red-500 mr-2" />
+                            <span className="text-red-700 dark:text-red-300 font-medium">Error creating contest</span>
+                          </div>
+                          <p className="text-red-600 dark:text-red-400 text-sm mt-2">
+                            {createError.message || 'Unknown error occurred'}
+                          </p>
+                        </div>
+                      )}
+
                       {/* Question Input */}
                       <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -170,33 +284,14 @@ export default function AdminPage() {
                         </div>
                       </div>
 
-                      {/* End Time */}
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                          Contest End Time *
-                        </label>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div className="relative">
-                            <Calendar className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                            <input
-                              type="date"
-                              value={formData.endDate}
-                              onChange={(e) => handleInputChange('endDate', e.target.value)}
-                              min={new Date().toISOString().split('T')[0]}
-                              className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-                              disabled={isCreating}
-                            />
-                          </div>
-                          <input
-                            type="time"
-                            value={formData.endTime}
-                            onChange={(e) => handleInputChange('endTime', e.target.value)}
-                            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-                            disabled={isCreating}
-                          />
+                      {/* Contest Duration Info */}
+                      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                        <div className="flex items-center">
+                          <Calendar className="h-5 w-5 text-blue-500 mr-2" />
+                          <span className="text-blue-700 dark:text-blue-300 font-medium">Contest Duration</span>
                         </div>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                          When should staking end and results be revealed?
+                        <p className="text-blue-600 dark:text-blue-400 text-sm mt-2">
+                          All contests run for exactly 24 hours from creation. Stakes are hidden until the contest ends and resolves.
                         </p>
                       </div>
 
@@ -204,9 +299,8 @@ export default function AdminPage() {
                       <Button
                         onClick={handleCreateContest}
                         disabled={!isFormValid || isCreating}
-                        className="w-full"
+                        className="w-full bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700"
                         size="lg"
-                        variant="gradient"
                       >
                         {isCreating ? (
                           <>
@@ -222,7 +316,7 @@ export default function AdminPage() {
                       </Button>
 
                       <div className="text-xs text-gray-500 dark:text-gray-400 text-center">
-                        This will deploy a new smart contract on Base Sepolia
+                        This will deploy a new smart contract on Sepolia Testnet
                       </div>
                     </>
                   )}
@@ -247,22 +341,48 @@ export default function AdminPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600 dark:text-gray-400">Total Contests:</span>
-                    <span className="font-semibold text-gray-900 dark:text-gray-100">5</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600 dark:text-gray-400">Active Contests:</span>
-                    <span className="font-semibold text-green-600">3</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600 dark:text-gray-400">Total Volume:</span>
-                    <span className="font-semibold text-gray-900 dark:text-gray-100">$127K</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600 dark:text-gray-400">Participants:</span>
-                    <span className="font-semibold text-gray-900 dark:text-gray-100">247</span>
-                  </div>
+                  {statsLoading ? (
+                    <div className="flex items-center justify-center py-4">
+                      <Loader2 className="h-6 w-6 animate-spin text-violet-500" />
+                    </div>
+                  ) : stats ? (
+                    <>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-600 dark:text-gray-400">Total Contests:</span>
+                        <span className="font-semibold text-gray-900 dark:text-gray-100">
+                          {stats.totalContests.toString()}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-600 dark:text-gray-400">Active Contests:</span>
+                        <span className="font-semibold text-green-600">
+                          {stats.activeContests.toString()}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-600 dark:text-gray-400">Resolved Contests:</span>
+                        <span className="font-semibold text-blue-600">
+                          {stats.resolvedContests.toString()}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-600 dark:text-gray-400">Platform Fees:</span>
+                        <span className="font-semibold text-gray-900 dark:text-gray-100">
+                          ${formatUSDC(stats.currentBalance)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-600 dark:text-gray-400">Admin Balance:</span>
+                        <span className="font-semibold text-gray-900 dark:text-gray-100">
+                          ${balanceFormatted} USDC
+                        </span>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="text-center py-4 text-gray-500 dark:text-gray-400">
+                      Failed to load stats
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </motion.div>
