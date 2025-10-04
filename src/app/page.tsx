@@ -93,7 +93,7 @@ export default function HomePage() {
                     <TrendingUp className="h-6 w-6 sm:h-8 sm:w-8 text-green-400" />
                   </div>
                   <h3 className="text-base sm:text-lg font-semibold text-white mb-1 sm:mb-2">Stake</h3>
-                  <p className="text-xs sm:text-sm text-white/70">Choose your side and stake USDC</p>
+                  <p className="text-xs sm:text-sm text-white/70">Choose your side and stake mUSDC</p>
                 </motion.div>
                 
                 <motion.div 
@@ -156,8 +156,25 @@ export default function HomePage() {
               </Button>
             </motion.div>
 
-            {/* Stats */}
-           
+            {/* Quick Contests Preview */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 1.2 }}
+              className="mt-8 sm:mt-12"
+            >
+              <p className="text-white/60 text-sm sm:text-base mb-4">
+                🔥 Active contests happening now
+              </p>
+              <Link href="/contests">
+                <Button 
+                  variant="ghost" 
+                  className="text-white/80 hover:text-white hover:bg-white/10 text-sm"
+                >
+                  See all contests <ArrowRight className="h-4 w-4 ml-2" />
+                </Button>
+              </Link>
+            </motion.div>
           </div>
         </div>
       </div>

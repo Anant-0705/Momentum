@@ -18,95 +18,480 @@ export const MINIMUM_STAKE = 1000000; // $1 in USDC (6 decimals)
 export const PLATFORM_FEE_PERCENT = 2; // 2% platform fee
 export const FAUCET_AMOUNT = 10000000000; // 10,000 USDC (6 decimals)
 
-// MockUSDC ABI - Essential functions for frontend
+// MockUSDC ABI - Essential functions for frontend (JSON format for Wagmi v2)
 export const MOCK_USDC_ABI = [
-  "function name() external view returns (string)",
-  "function symbol() external view returns (string)",
-  "function decimals() external view returns (uint8)",
-  "function totalSupply() external view returns (uint256)",
-  "function balanceOf(address account) external view returns (uint256)",
-  "function transfer(address to, uint256 amount) external returns (bool)",
-  "function allowance(address owner, address spender) external view returns (uint256)",
-  "function approve(address spender, uint256 amount) external returns (bool)",
-  "function transferFrom(address from, address to, uint256 amount) external returns (bool)",
-  "function faucet() external",
-  "function mint(address to, uint256 amount) external",
-  "event Transfer(address indexed from, address indexed to, uint256 value)",
-  "event Approval(address indexed owner, address indexed spender, uint256 value)"
+  {
+    "inputs": [],
+    "name": "name",
+    "outputs": [{"internalType": "string", "name": "", "type": "string"}],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "symbol", 
+    "outputs": [{"internalType": "string", "name": "", "type": "string"}],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "decimals",
+    "outputs": [{"internalType": "uint8", "name": "", "type": "uint8"}],
+    "stateMutability": "view", 
+    "type": "function"
+  },
+  {
+    "inputs": [{"internalType": "address", "name": "account", "type": "address"}],
+    "name": "balanceOf",
+    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {"internalType": "address", "name": "owner", "type": "address"},
+      {"internalType": "address", "name": "spender", "type": "address"}
+    ],
+    "name": "allowance", 
+    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {"internalType": "address", "name": "spender", "type": "address"},
+      {"internalType": "uint256", "name": "amount", "type": "uint256"}
+    ],
+    "name": "approve",
+    "outputs": [{"internalType": "bool", "name": "", "type": "bool"}],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "faucet",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {"indexed": true, "internalType": "address", "name": "from", "type": "address"},
+      {"indexed": true, "internalType": "address", "name": "to", "type": "address"},
+      {"indexed": false, "internalType": "uint256", "name": "value", "type": "uint256"}
+    ],
+    "name": "Transfer",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {"indexed": true, "internalType": "address", "name": "owner", "type": "address"},
+      {"indexed": true, "internalType": "address", "name": "spender", "type": "address"},
+      {"indexed": false, "internalType": "uint256", "name": "value", "type": "uint256"}
+    ],
+    "name": "Approval",
+    "type": "event"
+  }
 ] as const;
 
 // ContestFactory ABI - INCLUDING ALL NEW FUNCTIONS
 export const CONTEST_FACTORY_ABI = [
   // Core factory functions
-  "function createContest(string memory _question, string memory _optionA, string memory _optionB) external returns (address)",
-  "function getAllContests() external view returns (address[])",
-  "function getContestCount() external view returns (uint256)",
-  "function getContest(uint256 index) external view returns (address)",
-  "function isValidContest(address contest) external view returns (bool)",
-  
-  // NEW FUNCTIONS - Essential for production
-  "function getActiveContests() external view returns (address[])",
-  "function getResolvedContests() external view returns (address[])",
-  "function getContestBatch(uint256 startIndex, uint256 count) external view returns (address[])",
-  "function withdrawPlatformFees() external",
-  "function withdrawFees(address to) external",
-  "function getPlatformFeeBalance() external view returns (uint256)",
-  "function getFactoryStats() external view returns (uint256 totalContests, uint256 activeContests, uint256 resolvedContests, uint256 totalFeesCollected)",
-  "function transferFactoryOwnership(address newOwner) external",
-  
-  // View functions
-  "function owner() external view returns (address)",
-  "function stakingToken() external view returns (address)",
-  "function CONTEST_DURATION() external view returns (uint256)",
-  
-  // Events
-  "event ContestCreated(address indexed contestAddress, string question, string optionA, string optionB, uint256 endTime, address indexed creator)",
-  "event PlatformFeesWithdrawn(address indexed owner, uint256 amount)",
-  "event FeesWithdrawn(address indexed to, uint256 amount)",
-  "event OwnershipTransferred(address indexed previousOwner, address indexed newOwner)"
+  {
+    "inputs": [
+      {"internalType": "string", "name": "_question", "type": "string"},
+      {"internalType": "string", "name": "_optionA", "type": "string"},
+      {"internalType": "string", "name": "_optionB", "type": "string"}
+    ],
+    "name": "createContest",
+    "outputs": [{"internalType": "address", "name": "", "type": "address"}],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getAllContests",
+    "outputs": [{"internalType": "address[]", "name": "", "type": "address[]"}],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getContestCount",
+    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{"internalType": "uint256", "name": "index", "type": "uint256"}],
+    "name": "getContest",
+    "outputs": [{"internalType": "address", "name": "", "type": "address"}],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{"internalType": "address", "name": "contest", "type": "address"}],
+    "name": "isValidContest",
+    "outputs": [{"internalType": "bool", "name": "", "type": "bool"}],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getActiveContests",
+    "outputs": [{"internalType": "address[]", "name": "", "type": "address[]"}],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getResolvedContests",
+    "outputs": [{"internalType": "address[]", "name": "", "type": "address[]"}],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {"internalType": "uint256", "name": "startIndex", "type": "uint256"},
+      {"internalType": "uint256", "name": "count", "type": "uint256"}
+    ],
+    "name": "getContestBatch",
+    "outputs": [{"internalType": "address[]", "name": "", "type": "address[]"}],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "withdrawPlatformFees",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{"internalType": "address", "name": "to", "type": "address"}],
+    "name": "withdrawFees",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getPlatformFeeBalance",
+    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getFactoryStats",
+    "outputs": [
+      {"internalType": "uint256", "name": "totalContests", "type": "uint256"},
+      {"internalType": "uint256", "name": "activeContests", "type": "uint256"},
+      {"internalType": "uint256", "name": "resolvedContests", "type": "uint256"},
+      {"internalType": "uint256", "name": "totalFeesCollected", "type": "uint256"}
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{"internalType": "address", "name": "newOwner", "type": "address"}],
+    "name": "transferFactoryOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "owner",
+    "outputs": [{"internalType": "address", "name": "", "type": "address"}],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "stakingToken",
+    "outputs": [{"internalType": "address", "name": "", "type": "address"}],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "CONTEST_DURATION",
+    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {"indexed": true, "internalType": "address", "name": "contestAddress", "type": "address"},
+      {"indexed": false, "internalType": "string", "name": "question", "type": "string"},
+      {"indexed": false, "internalType": "string", "name": "optionA", "type": "string"},
+      {"indexed": false, "internalType": "string", "name": "optionB", "type": "string"},
+      {"indexed": false, "internalType": "uint256", "name": "endTime", "type": "uint256"},
+      {"indexed": true, "internalType": "address", "name": "creator", "type": "address"}
+    ],
+    "name": "ContestCreated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {"indexed": true, "internalType": "address", "name": "owner", "type": "address"},
+      {"indexed": false, "internalType": "uint256", "name": "amount", "type": "uint256"}
+    ],
+    "name": "PlatformFeesWithdrawn",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {"indexed": true, "internalType": "address", "name": "to", "type": "address"},
+      {"indexed": false, "internalType": "uint256", "name": "amount", "type": "uint256"}
+    ],
+    "name": "FeesWithdrawn",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {"indexed": true, "internalType": "address", "name": "previousOwner", "type": "address"},
+      {"indexed": true, "internalType": "address", "name": "newOwner", "type": "address"}
+    ],
+    "name": "OwnershipTransferred",
+    "type": "event"
+  }
 ] as const;
 
 // Contest ABI - Complete interface for individual contests
 export const CONTEST_ABI = [
-  // Core contest functions
-  "function stake(bool _forA, uint256 _amount) external",
-  "function resolve() external",
-  "function claim() external",
-  "function calculateWinnings(address user) external view returns (uint256)",
-  
-  // Contest information
-  "function question() external view returns (string)",
-  "function optionA_text() external view returns (string)",
-  "function optionB_text() external view returns (string)",
-  "function endTime() external view returns (uint256)",
-  "function isResolved() external view returns (bool)",
-  "function winnerIsA() external view returns (bool)",
-  "function platformFeeRecipient() external view returns (address)",
-  
-  // Staking data
-  "function totalStakedOnA() external view returns (uint256)",
-  "function totalStakedOnB() external view returns (uint256)",
-  "function stakesA(address user) external view returns (uint256)",
-  "function stakesB(address user) external view returns (uint256)",
-  "function hasClaimed(address user) external view returns (bool)",
-  
-  // Advanced view functions
-  "function getTotalPool() external view returns (uint256)",
-  "function getUserStakes(address user) external view returns (uint256 onA, uint256 onB, uint256 total)",
-  "function getContestInfo() external view returns (bool _isActive, bool _isResolved, uint256 _totalPool, uint256 _timeRemaining)",
-  "function isWinner(address user) external view returns (bool)",
-  "function getWinningOption() external view returns (bool isA, string memory optionText, uint256 totalStaked)",
-  "function getPlatformFee() external view returns (uint256)",
-  
-  // Constants
-  "function MINIMUM_STAKE() external view returns (uint256)",
-  "function PLATFORM_FEE_PERCENT() external view returns (uint256)",
-  "function stakingToken() external view returns (address)",
-  
-  // Events
-  "event Staked(address indexed user, bool forA, uint256 amount, uint256 timestamp)",
-  "event ContestResolved(bool winnerIsA, uint256 totalA, uint256 totalB, uint256 platformFee, uint256 timestamp)",
-  "event WinningsClaimed(address indexed user, uint256 amount, uint256 timestamp)"
+  {
+    "inputs": [
+      {"internalType": "bool", "name": "_forA", "type": "bool"},
+      {"internalType": "uint256", "name": "_amount", "type": "uint256"}
+    ],
+    "name": "stake",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "resolve",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "claim",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{"internalType": "address", "name": "user", "type": "address"}],
+    "name": "calculateWinnings",
+    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "question",
+    "outputs": [{"internalType": "string", "name": "", "type": "string"}],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "optionA_text",
+    "outputs": [{"internalType": "string", "name": "", "type": "string"}],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "optionB_text",
+    "outputs": [{"internalType": "string", "name": "", "type": "string"}],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "endTime",
+    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "isResolved",
+    "outputs": [{"internalType": "bool", "name": "", "type": "bool"}],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "winnerIsA",
+    "outputs": [{"internalType": "bool", "name": "", "type": "bool"}],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "platformFeeRecipient",
+    "outputs": [{"internalType": "address", "name": "", "type": "address"}],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "totalStakedOnA",
+    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "totalStakedOnB",
+    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{"internalType": "address", "name": "user", "type": "address"}],
+    "name": "stakesA",
+    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{"internalType": "address", "name": "user", "type": "address"}],
+    "name": "stakesB",
+    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{"internalType": "address", "name": "user", "type": "address"}],
+    "name": "hasClaimed",
+    "outputs": [{"internalType": "bool", "name": "", "type": "bool"}],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getTotalPool",
+    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{"internalType": "address", "name": "user", "type": "address"}],
+    "name": "getUserStakes",
+    "outputs": [
+      {"internalType": "uint256", "name": "onA", "type": "uint256"},
+      {"internalType": "uint256", "name": "onB", "type": "uint256"},
+      {"internalType": "uint256", "name": "total", "type": "uint256"}
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getContestInfo",
+    "outputs": [
+      {"internalType": "bool", "name": "_isActive", "type": "bool"},
+      {"internalType": "bool", "name": "_isResolved", "type": "bool"},
+      {"internalType": "uint256", "name": "_totalPool", "type": "uint256"},
+      {"internalType": "uint256", "name": "_timeRemaining", "type": "uint256"}
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{"internalType": "address", "name": "user", "type": "address"}],
+    "name": "isWinner",
+    "outputs": [{"internalType": "bool", "name": "", "type": "bool"}],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getWinningOption",
+    "outputs": [
+      {"internalType": "bool", "name": "isA", "type": "bool"},
+      {"internalType": "string", "name": "optionText", "type": "string"},
+      {"internalType": "uint256", "name": "totalStaked", "type": "uint256"}
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getPlatformFee",
+    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "MINIMUM_STAKE",
+    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "PLATFORM_FEE_PERCENT",
+    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "stakingToken",
+    "outputs": [{"internalType": "address", "name": "", "type": "address"}],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {"indexed": true, "internalType": "address", "name": "user", "type": "address"},
+      {"indexed": false, "internalType": "bool", "name": "forA", "type": "bool"},
+      {"indexed": false, "internalType": "uint256", "name": "amount", "type": "uint256"},
+      {"indexed": false, "internalType": "uint256", "name": "timestamp", "type": "uint256"}
+    ],
+    "name": "Staked",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {"indexed": false, "internalType": "bool", "name": "winnerIsA", "type": "bool"},
+      {"indexed": false, "internalType": "uint256", "name": "totalA", "type": "uint256"},
+      {"indexed": false, "internalType": "uint256", "name": "totalB", "type": "uint256"},
+      {"indexed": false, "internalType": "uint256", "name": "platformFee", "type": "uint256"},
+      {"indexed": false, "internalType": "uint256", "name": "timestamp", "type": "uint256"}
+    ],
+    "name": "ContestResolved",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {"indexed": true, "internalType": "address", "name": "user", "type": "address"},
+      {"indexed": false, "internalType": "uint256", "name": "amount", "type": "uint256"},
+      {"indexed": false, "internalType": "uint256", "name": "timestamp", "type": "uint256"}
+    ],
+    "name": "WinningsClaimed",
+    "type": "event"
+  }
 ] as const;
 
 // Type definitions for TypeScript
