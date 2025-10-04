@@ -7,10 +7,13 @@ import "../src/ContestFactory.sol";
 
 /**
  * @title Deploy Script for Momentum Contracts
- * @dev Deploys MockUSDC and ContestFactory to Sepolia testnet
+ * @dev Deploys MockUSDC and ContestFactory to Hella testnet
  * 
  * Usage:
- * forge script script/Deploy.s.sol:DeployScript --rpc-url $SEPOLIA_RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_API_KEY
+ * forge script script/Deploy.s.sol:DeployScript --rpc-url $HELLA_RPC_URL --private-key $PRIVATE_KEY --broadcast
+ * 
+ * Or using named network:
+ * forge script script/Deploy.s.sol:DeployScript --rpc-url hella --private-key $PRIVATE_KEY --broadcast
  */
 contract DeployScript is Script {
     function run() external {
@@ -42,15 +45,16 @@ contract DeployScript is Script {
         
         // Log deployment summary
         console.log("\n=== DEPLOYMENT SUMMARY ===");
-        console.log("Network: Sepolia Testnet");
+        console.log("Network: Hella Testnet");
         console.log("Deployer:", msg.sender);
         console.log("MockUSDC:", address(mockUSDC));
         console.log("ContestFactory:", address(factory));
         console.log("Sample Contest:", sampleContestAddress);
         console.log("\n=== NEXT STEPS ===");
         console.log("1. Update frontend with contract addresses");
-        console.log("2. Add MockUSDC address to MetaMask");
-        console.log("3. Use MockUSDC.faucet() to get test tokens");
-        console.log("4. Create contests via ContestFactory.createContest()");
+        console.log("2. Add Hella network to MetaMask");
+        console.log("3. Add MockUSDC address to MetaMask");
+        console.log("4. Use MockUSDC.faucet() to get test tokens");
+        console.log("5. Create contests via ContestFactory.createContest()");
     }
 }

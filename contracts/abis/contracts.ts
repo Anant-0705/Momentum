@@ -1,16 +1,16 @@
 /**
  * Momentum Contracts Configuration
- * Updated deployment on Sepolia Testnet with all new functions
+ * Deployed on Hella Testnet
  */
 
-// Contract Addresses (Sepolia Testnet)
-export const MOCK_USDC_ADDRESS = "0xAd5C7d6B80bAC82e03088d3BeB755EE6d0aCb7Fa" as const;
-export const CONTEST_FACTORY_ADDRESS = "0x04f77A36a5F865e8185cf9835Ab72fbab794514b" as const;
-export const ADMIN_ADDRESS = "0x6096797bA97e5bAEAE72FC472734ecc3AC88C67e" as const;
+// Contract Addresses (Hella Testnet - deployed)
+export const MOCK_USDC_ADDRESS = "0xa6559C3496c50fd09Cffbc36946E3278A909B18e" as const;
+export const CONTEST_FACTORY_ADDRESS = "0x4452262C3c480F0B759f119489354c4D1ae5f8d8" as const;
+export const ADMIN_ADDRESS = "0x8b189BE61dc48428bb4b85A60520550670406Eeb" as const;
 
 // Network Configuration
-export const SEPOLIA_CHAIN_ID = 11155111;
-export const SEPOLIA_RPC_URL = "https://eth-sepolia.g.alchemy.com/v2/LeGSIpWgv5T9ZQGB96w_M";
+export const HELLA_CHAIN_ID = 666888;
+export const HELLA_RPC_URL = "https://testnet-rpc.helachain.com";
 
 // Contract Configuration
 export const CONTEST_DURATION = 86400; // 24 hours
@@ -571,8 +571,8 @@ export default {
   MOCK_USDC_ADDRESS,
   CONTEST_FACTORY_ADDRESS,
   ADMIN_ADDRESS,
-  SEPOLIA_CHAIN_ID,
-  SEPOLIA_RPC_URL,
+  HELLA_CHAIN_ID,
+  HELLA_RPC_URL,
   MOCK_USDC_ABI,
   CONTEST_FACTORY_ABI,
   CONTEST_ABI,

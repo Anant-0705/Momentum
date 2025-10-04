@@ -24,7 +24,7 @@ A decentralized game of social consensus where users stake USDC on binary outcom
 - [Foundry](https://book.getfoundry.sh/getting-started/installation)
 - Node.js & npm (for frontend integration)
 - MetaMask wallet
-- Sepolia testnet ETH (get from [faucet](https://sepoliafaucet.com/))
+- Hella testnet ETH (contact Hella team for testnet tokens)
 
 ### Environment Setup
 
@@ -37,25 +37,23 @@ cp .env.example .env
 
 2. **Configure `.env` file:**
 ```bash
-SEPOLIA_RPC_URL=https://eth-sepolia.g.alchemy.com/v2/YOUR_ALCHEMY_KEY
+HELLA_RPC_URL=https://testnet-rpc.hella.network
 PRIVATE_KEY=your_private_key_without_0x
 ETHERSCAN_API_KEY=your_etherscan_api_key
 ```
 
-### Deploy to Sepolia
+### Deploy to Hella
 
 ```bash
 # Deploy contracts
 forge script script/Deploy.s.sol:DeployScript \
-  --rpc-url $SEPOLIA_RPC_URL \
+  --rpc-url $HELLA_RPC_URL \
   --private-key $PRIVATE_KEY \
-  --broadcast \
-  --verify \
-  --etherscan-api-key $ETHERSCAN_API_KEY
+  --broadcast
 
 # Verify deployment
 forge script script/VerifyDeployment.s.sol:VerifyDeploymentScript \
-  --rpc-url $SEPOLIA_RPC_URL \
+  --rpc-url $HELLA_RPC_URL \
   --private-key $PRIVATE_KEY \
   --broadcast
 ```
@@ -109,7 +107,7 @@ forge test -vvv
 forge test --gas-report
 ```
 
-## 📊 Contract Addresses (Sepolia)
+## 📊 Contract Addresses (Hella Testnet)
 
 After deployment, update these addresses:
 
